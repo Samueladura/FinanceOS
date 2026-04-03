@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
   User, Globe, Shield, Download,
-  Trash2, Save, Database
+  Trash2, Save, Database, Loader2
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { exportToCSV } from '../utils/formatters';
+import { fetchExchangeRates, convertAmount } from '../utils/currencyService';
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$', label: 'US Dollar' },
@@ -29,17 +30,38 @@ const DATE_FORMATS = [
 
 
 export function Settings() {
-  const { settings, updateSettings, transactions, accounts, categories, clearAllData } = useFinance();
+  const { settings, updateSettings, transactions, accounts, categories, clearAllData, updateTransaction, updateAccount } = useFinance();
   const [saved, setSaved] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [ratesLoading, setRatesLoading] = useState(false);
 
   const [userName, setUserName] = useState(settings.userName);
   const [userEmail, setUserEmail] = useState(settings.userEmail);
   const [currency, setCurrency] = useState(settings.currency);
   const [dateFormat, setDateFormat] = useState(settings.dateFormat);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const sel = CURRENCIES.find(c => c.code === currency);
+    const oldCurrency = settings.currency;
+    const newCurrency = currency;
+
+    if (oldCurrency !== newCurrency) {
+      setRatesLoading(true);
+      const rates = await fetchExchangeRates('USD');
+      setRatesLoading(false);
+
+      for (const t of transactions) {
+        const convertedAmount = convertAmount(t.amount, oldCurrency, newCurrency, rates);
+        await updateTransaction({ ...t, amount: convertedAmount });
+      }
+
+      for (const a of accounts) {
+        const accountCurrency = a.currency || oldCurrency;
+        const convertedBalance = convertAmount(a.balance, accountCurrency, newCurrency, rates);
+        await updateAccount({ ...a, balance: convertedBalance, currency: newCurrency });
+      }
+    }
+
     updateSettings({
       userName: userName.trim() || settings.userName,
       userEmail: userEmail.trim() || settings.userEmail,
@@ -105,16 +127,17 @@ export function Settings() {
         </div>
         <button
           onClick={handleSave}
+          disabled={ratesLoading}
           style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px',
             background: saved ? '#10b981' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            border: 'none', borderRadius: 12, color: 'white', cursor: 'pointer',
+            border: 'none', borderRadius: 12, color: 'white', cursor: ratesLoading ? 'wait' : 'pointer',
             fontSize: 14, fontWeight: 600, boxShadow: `0 4px 15px ${saved ? 'rgba(16,185,129,0.35)' : 'rgba(99,102,241,0.35)'}`,
-            transition: 'all 0.3s',
+            transition: 'all 0.3s', opacity: ratesLoading ? 0.7 : 1,
           }}
         >
-          <Save size={16} />
-          {saved ? 'Saved!' : 'Save Changes'}
+          {ratesLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          {ratesLoading ? 'Converting...' : saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
 
@@ -194,6 +217,9 @@ export function Settings() {
                 <option key={c.code} value={c.code}>{c.symbol} — {c.label}</option>
               ))}
             </select>
+            <p style={{ fontSize: 11, color: '#64748b', marginTop: 6 }}>
+              Changing currency will convert all transactions and account balances using real-time exchange rates.
+            </p>
           </div>
           <div>
             <label style={labelStyle}>Date Format</label>
