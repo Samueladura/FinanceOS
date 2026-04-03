@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import {
   User, Globe, Shield, Download,
-  Trash2, Save, Database, Loader2
+  Trash2, Save, Database, Loader2, Plus, X, Edit2, Tags
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { exportToCSV } from '../utils/formatters';
 import { fetchExchangeRates, convertAmount } from '../utils/currencyService';
+import type { Category } from '../types/finance';
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$', label: 'US Dollar' },
@@ -30,10 +31,17 @@ const DATE_FORMATS = [
 
 
 export function Settings() {
-  const { settings, updateSettings, transactions, accounts, categories, clearAllData, updateTransaction, updateAccount } = useFinance();
+  const { settings, updateSettings, transactions, accounts, categories, clearAllData, updateTransaction, updateAccount, addCategory, updateCategory, deleteCategory } = useFinance();
   const [saved, setSaved] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
   const [ratesLoading, setRatesLoading] = useState(false);
+
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [catName, setCatName] = useState('');
+  const [catIcon, setCatIcon] = useState('📦');
+  const [catColor, setCatColor] = useState('#6366f1');
+  const [catType, setCatType] = useState<'income' | 'expense' | 'both'>('expense');
 
   const [userName, setUserName] = useState(settings.userName);
   const [userEmail, setUserEmail] = useState(settings.userEmail);
@@ -91,6 +99,27 @@ export function Settings() {
   const handleClearData = async () => {
     await clearAllData();
     setClearConfirm(false);
+  };
+
+  const handleSaveCategory = async () => {
+    if (!catName.trim()) return;
+    if (editingCategory) {
+      await updateCategory({ ...editingCategory, name: catName, icon: catIcon, color: catColor, type: catType });
+    } else {
+      await addCategory({ name: catName, icon: catIcon, color: catColor, type: catType });
+    }
+    setShowCategoryModal(false);
+    setEditingCategory(null);
+    setCatName('');
+    setCatIcon('📦');
+    setCatColor('#6366f1');
+    setCatType('expense');
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (window.confirm('Delete this category?')) {
+      await deleteCategory(id);
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -236,6 +265,63 @@ export function Settings() {
         </div>
       </div>
 
+      {/* Categories */}
+      <div style={cardStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(168,85,247,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Tags size={18} color="#a855f7" />
+            </div>
+            <div>
+              <div style={sectionTitleStyle}>Categories</div>
+              <div style={{ ...sectionSubStyle, marginBottom: 0 }}>Manage your transaction categories</div>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowCategoryModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+              background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.25)',
+              borderRadius: 9, color: '#a855f7', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+            }}
+          >
+            <Plus size={14} /> Add
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {categories.map(cat => (
+            <div key={cat.id} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', borderRadius: 10,
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: '#f1f5f9' }}>{cat.name}</div>
+                  <div style={{ fontSize: 11, color: '#64748b', textTransform: 'capitalize' }}>{cat.type}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  onClick={() => { setEditingCategory(cat); setShowCategoryModal(true); }}
+                  style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: 4 }}
+                >
+                  <Edit2 size={14} />
+                </button>
+                <button
+                  onClick={() => handleDeleteCategory(cat.id)}
+                  style={{ background: 'transparent', border: 'none', color: '#f43f5e', cursor: 'pointer', padding: 4 }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Stats Overview */}
       <div style={cardStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
@@ -356,6 +442,53 @@ export function Settings() {
             <div style={{ display: 'flex', gap: 12 }}>
               <button onClick={() => setClearConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Cancel</button>
               <button onClick={handleClearData} style={{ flex: 1, padding: '12px', borderRadius: 12, border: 'none', background: '#f43f5e', color: 'white', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Delete All</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Modal */}
+      {showCategoryModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', padding: 16 }}>
+          <div style={{ background: '#0d1526', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, maxWidth: 400, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9' }}>{editingCategory ? 'Edit Category' : 'Add Category'}</h3>
+              <button onClick={() => { setShowCategoryModal(false); setEditingCategory(null); }} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Name</label>
+                <input type="text" value={catName} onChange={e => setCatName(e.target.value)} placeholder="Category name" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Icon</label>
+                <input type="text" value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="Emoji icon" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Color</label>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {['#f43f5e', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#94a3b8'].map(c => (
+                    <button key={c} onClick={() => setCatColor(c)} style={{
+                      width: 28, height: 28, borderRadius: 8, border: catColor === c ? '2px solid white' : 'none',
+                      background: c, cursor: 'pointer',
+                    }} />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Type</label>
+                <select value={catType} onChange={e => setCatType(e.target.value as 'income' | 'expense' | 'both')} style={{ ...inputStyle, appearance: 'none' }}>
+                  <option value="expense">Expense</option>
+                  <option value="income">Income</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+              <button onClick={() => { setShowCategoryModal(false); setEditingCategory(null); }} style={{ flex: 1, padding: '12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 14, fontWeight: 500 }}>Cancel</button>
+              <button onClick={handleSaveCategory} style={{ flex: 1, padding: '12px', borderRadius: 10, border: 'none', background: '#a855f7', color: 'white', cursor: 'pointer', fontSize: 14, fontWeight: 500 }}>{editingCategory ? 'Update' : 'Add'}</button>
             </div>
           </div>
         </div>

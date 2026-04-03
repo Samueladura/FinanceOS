@@ -249,9 +249,56 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
   }, [settings.theme, loaded]);
 
   const addTransaction = useCallback(async (t: Omit<Transaction, 'id'>) => {
+    if (!t.accountId) {
+      console.error('No accountId provided for transaction', t);
+      return;
+    }
+    
+    console.log('Adding transaction:', t.type, t.amount, 'to account:', t.accountId);
+    
     const id = generateId();
     const newT = { ...t, id };
     setTransactions(prev => [newT, ...prev]);
+
+    setAccounts(prevAccounts => {
+      console.log('Current accounts:', prevAccounts.map(a => ({ id: a.id, name: a.name, balance: a.balance })));
+      return prevAccounts.map(acc => {
+        if (acc.id === t.accountId) {
+          if (t.type === 'expense') {
+            const newBalance = acc.balance - t.amount;
+            console.log('Expense: reducing balance from', acc.balance, 'to', newBalance);
+            if (userId) {
+              supabase.from('accounts').update({ balance: newBalance }).eq('id', acc.id).then();
+            }
+            return { ...acc, balance: newBalance };
+          } else if (t.type === 'income') {
+            const newBalance = acc.balance + t.amount;
+            console.log('Income: increasing balance from', acc.balance, 'to', newBalance);
+            if (userId) {
+              supabase.from('accounts').update({ balance: newBalance }).eq('id', acc.id).then();
+            }
+            return { ...acc, balance: newBalance };
+          } else if (t.type === 'transfer' && t.toAccountId) {
+            const newBalance = acc.balance - t.amount;
+            console.log('Transfer out: reducing balance from', acc.balance, 'to', newBalance);
+            if (userId) {
+              supabase.from('accounts').update({ balance: newBalance }).eq('id', acc.id).then();
+            }
+            return { ...acc, balance: newBalance };
+          }
+        }
+        if (t.type === 'transfer' && t.toAccountId && acc.id === t.toAccountId) {
+          const newBalance = acc.balance + t.amount;
+          console.log('Transfer in: increasing balance from', acc.balance, 'to', newBalance);
+          if (userId) {
+            supabase.from('accounts').update({ balance: newBalance }).eq('id', acc.id).then();
+          }
+          return { ...acc, balance: newBalance };
+        }
+        return acc;
+      });
+    });
+
     if (userId) {
       await supabase.from('transactions').insert(transactionToRow(newT, userId));
     }
@@ -265,11 +312,42 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
   }, [userId]);
 
   const deleteTransaction = useCallback(async (id: string) => {
+    const tx = transactions.find(t => t.id === id);
     setTransactions(prev => prev.filter(x => x.id !== id));
+
+    if (tx) {
+      setAccounts(prev => {
+        const updated = prev.map(acc => {
+          if (acc.id === tx.accountId) {
+            if (tx.type === 'expense') {
+              return { ...acc, balance: acc.balance + tx.amount };
+            } else if (tx.type === 'income') {
+              return { ...acc, balance: acc.balance - tx.amount };
+            } else if (tx.type === 'transfer' && tx.toAccountId) {
+              return { ...acc, balance: acc.balance + tx.amount };
+            }
+          }
+          if (tx.type === 'transfer' && tx.toAccountId && acc.id === tx.toAccountId) {
+            return { ...acc, balance: acc.balance - tx.amount };
+          }
+          return acc;
+        });
+
+        if (userId) {
+          const updates = updated
+            .filter(acc => acc.id === tx.accountId || (tx.type === 'transfer' && tx.toAccountId && acc.id === tx.toAccountId))
+            .map(acc => supabase.from('accounts').update({ balance: acc.balance }).eq('id', acc.id));
+          Promise.all(updates).then();
+        }
+
+        return updated;
+      });
+    }
+
     if (userId) {
       await supabase.from('transactions').delete().eq('id', id);
     }
-  }, [userId]);
+  }, [userId, transactions]);
 
   const addAccount = useCallback(async (a: Omit<Account, 'id'>) => {
     const id = generateId();

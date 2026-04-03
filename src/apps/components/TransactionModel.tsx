@@ -53,7 +53,8 @@ export function TransactionModal({ open, onClose, initial }: Props) {
       setCategory('');
       setDescription('');
       setDate(new Date().toISOString().slice(0, 10));
-      setAccountId(accounts.find(a => a.isDefault)?.id || accounts[0]?.id || '');
+      const defaultAcc = accounts.find(a => a.isDefault)?.id || accounts[0]?.id;
+      setAccountId(defaultAcc || '');
       setToAccountId('');
       setRecurring(false);
       setRecurringInterval('monthly');
