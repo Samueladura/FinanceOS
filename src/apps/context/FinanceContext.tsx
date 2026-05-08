@@ -166,7 +166,7 @@ function rowToSettings(row: Record<string, unknown>): AppSettings {
     currency: row.currency as string,
     currencySymbol: row.currency_symbol as string,
     locale: row.locale as string,
-    theme: row.theme as AppSettings['theme'],
+    theme: 'light',
     dateFormat: row.date_format as string,
     userName: row.user_name as string,
     userEmail: row.user_email as string,
@@ -214,15 +214,52 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
 
       if (cancelled) return;
 
-      if (catRes.data?.length) setCategories(catRes.data.map(rowToCategory));
-      if (accRes.data?.length) setAccounts(accRes.data.map(rowToAccount));
-      if (txRes.data?.length) setTransactions(txRes.data.map(rowToTransaction));
-      if (budRes.data?.length) setBudgets(budRes.data.map(rowToBudget));
-      if (setRes.data) {
+      const errors = [catRes.error, accRes.error, txRes.error, budRes.error, setRes.error].filter(Boolean);
+      if (errors.length > 0) {
+        console.error('Supabase load error:', errors);
+
+        const hasNotFound = errors.some(err => err?.message?.includes('Not Found') || err?.message?.includes('404'));
+        if (hasNotFound) {
+          console.error(
+            'Supabase REST endpoint returned 404. Confirm the project URL and that the tables from supabase/migrations/001_init.sql are applied to the correct Supabase project.'
+          );
+        }
+      }
+
+      if (catRes.error) {
+        setCategories(defaultCategories);
+      } else if (catRes.data?.length) {
+        setCategories(catRes.data.map(rowToCategory));
+      }
+
+      if (accRes.error) {
+        setAccounts(defaultAccounts);
+      } else if (accRes.data?.length) {
+        setAccounts(accRes.data.map(rowToAccount));
+      }
+
+      if (txRes.error) {
+        setTransactions(defaultTransactions);
+      } else if (txRes.data?.length) {
+        setTransactions(txRes.data.map(rowToTransaction));
+      }
+
+      if (budRes.error) {
+        setBudgets(defaultBudgets);
+      } else if (budRes.data?.length) {
+        setBudgets(budRes.data.map(rowToBudget));
+      }
+
+      if (setRes.error) {
+        setSettings(prev => ({
+          ...prev,
+          userName: userName || prev.userName,
+          userEmail: userEmail || prev.userEmail,
+        }));
+      } else if (setRes.data) {
         setSettings(rowToSettings(setRes.data));
         setSelectedAccountCurrencyState(rowToSettings(setRes.data).currency);
       } else {
-        // No settings yet - use Supabase auth metadata
         setSettings(prev => ({
           ...prev,
           userName: userName || prev.userName,
@@ -235,18 +272,9 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
 
     loadData();
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, userName, userEmail]);
 
-  // Apply theme
-  useEffect(() => {
-    if (!loaded) return;
-    const root = document.documentElement;
-    if (settings.theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [settings.theme, loaded]);
+
 
   const addTransaction = useCallback(async (t: Omit<Transaction, 'id'>) => {
     if (!t.accountId) {
@@ -300,7 +328,12 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
     });
 
     if (userId) {
-      await supabase.from('transactions').insert(transactionToRow(newT, userId));
+      const res = await supabase.from('transactions').insert(transactionToRow(newT, userId));
+      if (res.error) {
+        console.error('Failed to save transaction to database:', res.error);
+        setTransactions(prev => prev.filter(t => t.id !== newT.id));
+        throw new Error(`Database save failed: ${res.error.message}`);
+      }
     }
   }, [userId]);
 
@@ -419,7 +452,7 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
   }, [userId]);
 
   const updateSettings = useCallback(async (s: Partial<AppSettings>) => {
-    setSettings(prev => ({ ...prev, ...s }));
+    setSettings(prev => ({ ...prev, ...s, theme: 'light' }));
     if (s.currency !== undefined) {
       setSelectedAccountCurrencyState(s.currency);
     }
@@ -428,7 +461,6 @@ export function FinanceProvider({ children, userId, userName, userEmail }: { chi
       if (s.currency !== undefined) update.currency = s.currency;
       if (s.currencySymbol !== undefined) update.currency_symbol = s.currencySymbol;
       if (s.locale !== undefined) update.locale = s.locale;
-      if (s.theme !== undefined) update.theme = s.theme;
       if (s.dateFormat !== undefined) update.date_format = s.dateFormat;
       if (s.userName !== undefined) update.user_name = s.userName;
       if (s.userEmail !== undefined) update.user_email = s.userEmail;

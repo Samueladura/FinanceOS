@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, TrendingUp } from 'lucide-react';
+import { Mail, Lock, User, TrendingUp, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import {
   defaultCategories, defaultAccounts, defaultBudgets,
@@ -11,39 +11,81 @@ export function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const seedUserData = async (userId: string, userName: string, userEmail: string) => {
+    const generateId = () => crypto.randomUUID();
+    const accountIdMap = new Map(defaultAccounts.map(a => [a.id, generateId()]));
+
     // Insert categories
-    await supabase.from('categories').insert(
-      defaultCategories.map(c => ({ ...c, user_id: userId }))
-    );
-
-    // Insert accounts
-    await supabase.from('accounts').insert(
-      defaultAccounts.map(a => ({ ...a, user_id: userId, initial_balance: a.initialBalance, is_default: a.isDefault, credit_limit: a.creditLimit ?? null }))
-    );
-
-    // Insert transactions
-    await supabase.from('transactions').insert(
-      defaultTransactions.map(t => ({
-        ...t,
+    const { error: categoriesError } = await supabase.from('categories').insert(
+      defaultCategories.map(c => ({
+        id: generateId(),
         user_id: userId,
-        account_id: t.accountId,
-        to_account_id: t.toAccountId ?? null,
-        recurring_interval: t.recurringInterval ?? null,
+        name: c.name,
+        icon: c.icon,
+        color: c.color,
+        type: c.type,
       }))
     );
+    if (categoriesError) throw categoriesError;
+
+    // Insert accounts
+    const { error: accountsError } = await supabase.from('accounts').insert(
+      defaultAccounts.map(a => ({
+        id: accountIdMap.get(a.id),
+        user_id: userId,
+        name: a.name,
+        type: a.type,
+        balance: a.balance,
+        initial_balance: a.initialBalance,
+        currency: a.currency || 'USD',
+        color: a.color,
+        is_default: a.isDefault,
+        credit_limit: a.creditLimit ?? null,
+      }))
+    );
+    if (accountsError) throw accountsError;
+
+    // Insert transactions
+    const { error: transactionsError } = await supabase.from('transactions').insert(
+      defaultTransactions.map(t => ({
+        id: generateId(),
+        user_id: userId,
+        type: t.type,
+        amount: t.amount,
+        category: t.category,
+        description: t.description,
+        date: t.date,
+        account_id: accountIdMap.get(t.accountId),
+        to_account_id: t.toAccountId ? accountIdMap.get(t.toAccountId) ?? null : null,
+        recurring: t.recurring,
+        recurring_interval: t.recurringInterval ?? null,
+        tags: t.tags,
+        notes: t.notes ?? null,
+      }))
+    );
+    if (transactionsError) throw transactionsError;
 
     // Insert budgets
-    await supabase.from('budgets').insert(
-      defaultBudgets.map(b => ({ ...b, user_id: userId }))
+    const { error: budgetsError } = await supabase.from('budgets').insert(
+      defaultBudgets.map(b => ({
+        id: generateId(),
+        user_id: userId,
+        category: b.category,
+        limit: b.limit,
+        period: b.period,
+        color: b.color,
+        icon: b.icon,
+      }))
     );
+    if (budgetsError) throw budgetsError;
 
     // Insert settings
-    await supabase.from('settings').insert({
+    const { error: settingsError } = await supabase.from('settings').insert({
       user_id: userId,
       currency: defaultSettings.currency,
       currency_symbol: defaultSettings.currencySymbol,
@@ -53,6 +95,7 @@ export function Signup() {
       user_name: userName,
       user_email: userEmail,
     });
+    if (settingsError) throw settingsError;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,47 +103,83 @@ export function Signup() {
     setLoading(true);
     setError('');
 
-    try {
-      const userName = name || email.split('@')[0];
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password.');
+      setLoading(false);
+      return;
+    }
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { 
-            name: userName,
-            email: email,
-          },
-        },
-      });
+    const maxRetries = 3;
 
-      if (signUpError) throw signUpError;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const userName = name.trim() || email.split('@')[0];
 
-      if (data.user) {
-        // Seed user data
-        await seedUserData(data.user.id, userName, email);
-
-        // Auto sign in after signup
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const signUpPayload = {
           email,
           password,
-        });
+          options: {
+            data: {
+              full_name: userName,
+            },
+          },
+        };
 
-        if (signInError) throw signInError;
+        const { data, error: signUpError } = await supabase.auth.signUp(signUpPayload);
+        console.log('Supabase signUp response', { data, signUpError, signUpPayload });
 
-        navigate('/');
+        if (signUpError) throw signUpError;
+        if (!data.user) {
+          setError('Signup request submitted. Please verify your email before signing in.');
+          setLoading(false);
+          return;
+        }
+
+        await seedUserData(data.user.id, userName, email);
+
+        if (data.session) {
+          navigate('/');
+        } else {
+          setError('Signup successful. Please verify your email before signing in.');
+        }
+
+        setLoading(false);
+        return; // Success, exit the function
+      } catch (err: unknown) {
+        console.error(`Signup attempt ${attempt} failed:`, err);
+
+        const isRetryable = err instanceof Error && (
+          err.name === 'AuthRetryableFetchError' ||
+          err.message?.toLowerCase().includes('timeout') ||
+          err.message?.toLowerCase().includes('network') ||
+          err.message?.toLowerCase().includes('fetch')
+        );
+
+        if (!isRetryable || attempt === maxRetries) {
+          let message = 'Signup failed. Please try again.';
+          if (err instanceof Error) {
+            message = err.message || message;
+            if (err.name === 'AuthRetryableFetchError' || message.toLowerCase().includes('timeout')) {
+              message = 'Signup service is temporarily unavailable. Please try again in a few minutes.';
+            }
+          }
+          setError(message);
+          console.error('Signup error after all retries', err);
+          break;
+        }
+
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+        console.log(`Retrying signup in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Signup failed';
-      setError(message);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, #0a0f1e 0%, #1e1b4b 50%, #2a1d5c 100%)',
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%)',
       backgroundSize: '400% 400%',
       animation: 'gradientShift 15s ease infinite'
     }}>
@@ -159,12 +238,12 @@ export function Signup() {
       }}>
         {/* Glassmorphism card */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
+          background: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
           borderRadius: 24,
           padding: 48,
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)'
         }}>
           {/* Logo */}
           <div style={{
@@ -179,26 +258,26 @@ export function Signup() {
               <TrendingUp size={24} color="white" />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 24, color: '#f1f5f9', letterSpacing: '-0.5px' }}>FinanceOS</div>
-              <div style={{ fontSize: 13, color: '#94a3b8' }}>Get started today</div>
+              <div style={{ fontWeight: 800, fontSize: 24, color: '#0f172a', letterSpacing: '-0.5px' }}>FinanceOS</div>
+              <div style={{ fontSize: 13, color: '#64748b' }}>Get started today</div>
             </div>
           </div>
 
           <h1 style={{ 
             margin: 0, marginBottom: 8, 
             fontSize: 32, fontWeight: 800, 
-            color: '#f1f5f9', 
+            color: '#0f172a', 
             letterSpacing: '-0.5px'
           }}>
             Create account
           </h1>
-          <p style={{ 
-            margin: 0, marginBottom: 36, 
-            color: '#94a3b8', 
+          <p style={{
+            margin: 0, marginBottom: 36,
+            color: '#64748b',
             fontSize: 16,
             lineHeight: 1.6
           }}>
-            Start tracking your finances with a free account
+            Create your account to start managing your finances
           </p>
 
           {error && (
@@ -215,118 +294,130 @@ export function Signup() {
             </div>
           )}
 
-          {/* Name Field */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ 
-              display: 'flex', alignItems: 'center', gap: 8,
-              color: '#94a3b8', fontSize: 13, fontWeight: 600,
-              marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
-            }}>
-              <User size={16} />
-              Full name
-            </label>
-            <div style={{
-              position: 'relative',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 16,
-              transition: 'all 0.2s ease',
-              overflow: 'hidden'
-            }}>
-              <input 
-                value={name} 
-                onChange={e => setName(e.target.value)} 
-                required 
-                type="text" 
-                style={{ 
-                  width: '100%', 
-                  padding: '16px 20px 16px 52px', 
-                  background: 'transparent', 
-                  color: 'white', 
-                  border: 'none', 
+            {/* Name Field */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                color: '#64748b', fontSize: 13, fontWeight: 600,
+                marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
+              }}>
+                <User size={16} />
+                Full name
+              </label>
+              <div style={{
+                position: 'relative',
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                borderRadius: 16,
+                transition: 'all 0.2s ease',
+              }}>
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                type="text"
+                style={{
+                  width: '100%',
+                  padding: '16px 20px 16px 52px',
+                  background: 'transparent',
+                  color: '#0f172a',
+                  border: 'none',
                   outline: 'none',
                   fontSize: 16
-                }} 
-                placeholder="John Doe"
+                }}
+                placeholder="Your full name"
               />
               <User size={18} color="#64748b" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
             </div>
           </div>
 
-          {/* Email Field */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ 
-              display: 'flex', alignItems: 'center', gap: 8,
-              color: '#94a3b8', fontSize: 13, fontWeight: 600,
-              marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
-            }}>
-              <Mail size={16} />
-              Email address
-            </label>
-            <div style={{
-              position: 'relative',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 16,
-              transition: 'all 0.2s ease',
-              overflow: 'hidden'
-            }}>
-              <input 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-                required 
-                type="email" 
-                style={{ 
-                  width: '100%', 
-                  padding: '16px 20px 16px 52px', 
-                  background: 'transparent', 
-                  color: 'white', 
-                  border: 'none', 
+            {/* Email Field */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                color: '#64748b', fontSize: 13, fontWeight: 600,
+                marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
+              }}>
+                <Mail size={16} />
+                Email address
+              </label>
+              <div style={{
+                position: 'relative',
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                borderRadius: 16,
+                transition: 'all 0.2s ease',
+                overflow: 'hidden'
+              }}>
+              <input
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                type="email"
+                style={{
+                  width: '100%',
+                  padding: '16px 20px 16px 52px',
+                  background: 'transparent',
+                  color: '#0f172a',
+                  border: 'none',
                   outline: 'none',
                   fontSize: 16
-                }} 
+                }}
                 placeholder="your@email.com"
               />
               <Mail size={18} color="#64748b" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
             </div>
           </div>
 
-          {/* Password Field */}
-          <div style={{ marginBottom: 28 }}>
-            <label style={{ 
-              display: 'flex', alignItems: 'center', gap: 8,
-              color: '#94a3b8', fontSize: 13, fontWeight: 600,
-              marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
-            }}>
-              <Lock size={16} />
-              Password
-            </label>
-            <div style={{
-              position: 'relative',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 16,
-              transition: 'all 0.2s ease',
-              overflow: 'hidden'
-            }}>
-              <input 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                required 
-                type="password" 
+            {/* Password Field */}
+            <div style={{ marginBottom: 28 }}>
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                color: '#64748b', fontSize: 13, fontWeight: 600,
+                marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
+              }}>
+                <Lock size={16} />
+                Password
+              </label>
+              <div style={{
+                position: 'relative',
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                borderRadius: 16,
+                transition: 'all 0.2s ease',
+                overflow: 'hidden'
+              }}>
+              <input
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                type={showPassword ? "text" : "password"}
                 minLength={6}
-                style={{ 
-                  width: '100%', 
-                  padding: '16px 20px 16px 52px', 
-                  background: 'transparent', 
-                  color: 'white', 
-                  border: 'none', 
+                style={{
+                  width: '100%',
+                  padding: '16px 52px 16px 52px',
+                  background: 'transparent',
+                  color: '#0f172a',
+                  border: 'none',
                   outline: 'none',
                   fontSize: 16
-                }} 
+                }}
                 placeholder="••••••••"
               />
               <Lock size={18} color="#64748b" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+              <div
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  cursor: 'pointer',
+                  color: '#64748b'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </div>
             </div>
           </div>
 

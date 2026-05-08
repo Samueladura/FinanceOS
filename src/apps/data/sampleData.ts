@@ -2,25 +2,25 @@ import type { Transaction, Account, Budget, Category, AppSettings } from '../typ
 
 export const defaultCategories: Category[] = [
   // Income
-  { id: 'salary', name: 'Salary', icon: '💼', color: '#10b981', type: 'income' },
-  { id: 'freelance', name: 'Freelance', icon: '💻', color: '#06b6d4', type: 'income' },
-  { id: 'investment', name: 'Investment', icon: '📈', color: '#8b5cf6', type: 'income' },
-  { id: 'business', name: 'Business', icon: '🏢', color: '#f59e0b', type: 'income' },
-  { id: 'gift', name: 'Gift', icon: '🎁', color: '#ec4899', type: 'income' },
-  { id: 'other-income', name: 'Other Income', icon: '💰', color: '#6366f1', type: 'income' },
+  { id: 'salary', name: 'Salary', icon: 'Briefcase', color: '#10b981', type: 'income' },
+  { id: 'freelance', name: 'Freelance', icon: 'Briefcase', color: '#06b6d4', type: 'income' },
+  { id: 'investment', name: 'Investment', icon: 'PiggyBank', color: '#8b5cf6', type: 'income' },
+  { id: 'business', name: 'Business', icon: 'Building2', color: '#f59e0b', type: 'income' },
+  { id: 'gift', name: 'Gift', icon: 'Gift', color: '#ec4899', type: 'income' },
+  { id: 'other-income', name: 'Other Income', icon: 'DollarIcon', color: '#6366f1', type: 'income' },
   // Expense
-  { id: 'food', name: 'Food & Dining', icon: '🍕', color: '#f97316', type: 'expense' },
-  { id: 'transport', name: 'Transportation', icon: '🚗', color: '#3b82f6', type: 'expense' },
-  { id: 'shopping', name: 'Shopping', icon: '🛍️', color: '#ec4899', type: 'expense' },
-  { id: 'housing', name: 'Housing', icon: '🏠', color: '#6366f1', type: 'expense' },
-  { id: 'entertainment', name: 'Entertainment', icon: '🎬', color: '#a855f7', type: 'expense' },
-  { id: 'healthcare', name: 'Healthcare', icon: '💊', color: '#ef4444', type: 'expense' },
-  { id: 'education', name: 'Education', icon: '📚', color: '#0ea5e9', type: 'expense' },
-  { id: 'utilities', name: 'Utilities', icon: '⚡', color: '#f59e0b', type: 'expense' },
-  { id: 'travel', name: 'Travel', icon: '✈️', color: '#14b8a6', type: 'expense' },
-  { id: 'personal', name: 'Personal Care', icon: '💄', color: '#e879f9', type: 'expense' },
-  { id: 'subscriptions', name: 'Subscriptions', icon: '📱', color: '#64748b', type: 'expense' },
-  { id: 'other-expense', name: 'Other', icon: '📦', color: '#94a3b8', type: 'expense' },
+  { id: 'food', name: 'Food & Dining', icon: 'Utensils', color: '#f97316', type: 'expense' },
+  { id: 'transport', name: 'Transportation', icon: 'Car', color: '#3b82f6', type: 'expense' },
+  { id: 'shopping', name: 'Shopping', icon: 'ShoppingCart', color: '#ec4899', type: 'expense' },
+  { id: 'housing', name: 'Housing', icon: 'Home', color: '#6366f1', type: 'expense' },
+  { id: 'entertainment', name: 'Entertainment', icon: 'Film', color: '#a855f7', type: 'expense' },
+  { id: 'healthcare', name: 'Healthcare', icon: 'Pill', color: '#ef4444', type: 'expense' },
+  { id: 'education', name: 'Education', icon: 'Book', color: '#0ea5e9', type: 'expense' },
+  { id: 'utilities', name: 'Utilities', icon: 'Zap', color: '#f59e0b', type: 'expense' },
+  { id: 'travel', name: 'Travel', icon: 'Plane', color: '#14b8a6', type: 'expense' },
+  { id: 'personal', name: 'Personal Care', icon: 'Heart', color: '#e879f9', type: 'expense' },
+  { id: 'subscriptions', name: 'Subscriptions', icon: 'Smartphone', color: '#64748b', type: 'expense' },
+  { id: 'other-expense', name: 'Other', icon: 'ShoppingCart', color: '#94a3b8', type: 'expense' },
 ];
 
 export const defaultAccounts: Account[] = [
@@ -68,14 +68,14 @@ export const defaultAccounts: Account[] = [
 ];
 
 export const defaultBudgets: Budget[] = [
-  { id: 'bud-1', category: 'food', limit: 600, period: 'monthly', color: '#f97316', icon: '🍕' },
-  { id: 'bud-2', category: 'transport', limit: 300, period: 'monthly', color: '#3b82f6', icon: '🚗' },
-  { id: 'bud-3', category: 'shopping', limit: 400, period: 'monthly', color: '#ec4899', icon: '🛍️' },
-  { id: 'bud-4', category: 'entertainment', limit: 250, period: 'monthly', color: '#a855f7', icon: '🎬' },
-  { id: 'bud-5', category: 'healthcare', limit: 200, period: 'monthly', color: '#ef4444', icon: '💊' },
-  { id: 'bud-6', category: 'utilities', limit: 200, period: 'monthly', color: '#f59e0b', icon: '⚡' },
-  { id: 'bud-7', category: 'subscriptions', limit: 100, period: 'monthly', color: '#64748b', icon: '📱' },
-  { id: 'bud-8', category: 'personal', limit: 150, period: 'monthly', color: '#e879f9', icon: '💄' },
+  { id: 'bud-1', category: 'food', limit: 600, period: 'monthly', color: '#f97316', icon: 'Utensils' },
+  { id: 'bud-2', category: 'transport', limit: 300, period: 'monthly', color: '#3b82f6', icon: 'Car' },
+  { id: 'bud-3', category: 'shopping', limit: 400, period: 'monthly', color: '#ec4899', icon: 'ShoppingCart' },
+  { id: 'bud-4', category: 'entertainment', limit: 250, period: 'monthly', color: '#a855f7', icon: 'Film' },
+  { id: 'bud-5', category: 'healthcare', limit: 200, period: 'monthly', color: '#ef4444', icon: 'Pill' },
+  { id: 'bud-6', category: 'utilities', limit: 200, period: 'monthly', color: '#f59e0b', icon: 'Zap' },
+  { id: 'bud-7', category: 'subscriptions', limit: 100, period: 'monthly', color: '#64748b', icon: 'Smartphone' },
+  { id: 'bud-8', category: 'personal', limit: 150, period: 'monthly', color: '#e879f9', icon: 'Heart' },
 ];
 
 export const defaultTransactions: Transaction[] = [
@@ -139,7 +139,7 @@ export const defaultSettings: AppSettings = {
   currency: 'USD',
   currencySymbol: '$',
   locale: 'en-US',
-  theme: 'dark',
+  theme: 'light',
   dateFormat: 'MM/dd/yyyy',
   userName: 'Alex Johnson',
   userEmail: 'alex.johnson@email.com',

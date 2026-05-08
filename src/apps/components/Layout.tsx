@@ -3,11 +3,19 @@ import { NavLink, Outlet, useLocation } from 'react-router';
 import {
   LayoutDashboard, ArrowLeftRight, PieChart, Wallet,
   Target, Settings, Menu, X, Bell, TrendingUp, TrendingDown,
-  ChevronRight, AlertTriangle, CheckCircle, Info, DollarSign
+  ChevronRight, AlertTriangle, CheckCircle, Info, DollarSign, LogOut
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
-import { LogOut } from 'lucide-react';
 import { formatCurrency, getRelativeTime } from '../utils/formatters';
+
+// const navItems = [
+//   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+//   { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
+//   { to: '/budget', icon: Target, label: 'Budget' },
+//   { to: '/analytics', icon: PieChart, label: 'Analytics' },
+//   { to: '/accounts', icon: Wallet, label: 'Accounts' },
+//   { to: '/settings', icon: Settings, label: 'Settings' },
+// ];
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -194,7 +202,7 @@ function SidebarContent({ onLinkClick, showLogo = true }: { onLinkClick?: () => 
   return (
     <>
       {showLogo && (
-        <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid #e2e8f0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               width: 38, height: 38, borderRadius: 10,
@@ -204,7 +212,7 @@ function SidebarContent({ onLinkClick, showLogo = true }: { onLinkClick?: () => 
               <TrendingUp size={20} color="white" />
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 16, color: '#f1f5f9', letterSpacing: '-0.3px' }}>FinanceOS</div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: '#0f172a', letterSpacing: '-0.3px' }}>FinanceOS</div>
               <div style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>Personal Finance</div>
             </div>
           </div>
@@ -212,14 +220,14 @@ function SidebarContent({ onLinkClick, showLogo = true }: { onLinkClick?: () => 
       )}
 
       {/* Balance Card */}
-      <div style={{ padding: '16px 20px' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))',
-          border: '1px solid rgba(99,102,241,0.2)',
-          borderRadius: 14, padding: '16px',
-        }}>
+        <div style={{ padding: '16px 20px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))',
+            border: '1px solid rgba(99,102,241,0.15)',
+            borderRadius: 14, padding: '16px',
+          }}>
           <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Net Worth</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.5px' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.5px' }}>
             {formatCurrency(getTotalBalance(), displayCurrencySymbol)}
           </div>
           <div style={{ fontSize: 11, color: netWorthChange.positive ? '#10b981' : '#f43f5e', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -242,9 +250,9 @@ function SidebarContent({ onLinkClick, showLogo = true }: { onLinkClick?: () => 
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '11px 14px', borderRadius: 10, marginBottom: 3,
               textDecoration: 'none',
-              background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-              color: isActive ? '#a5b4fc' : '#94a3b8',
-              border: isActive ? '1px solid rgba(99,102,241,0.25)' : '1px solid transparent',
+              background: isActive ? 'rgba(99,102,241,0.1)' : 'transparent',
+              color: isActive ? '#6366f1' : '#64748b',
+              border: isActive ? '1px solid rgba(99,102,241,0.2)' : '1px solid transparent',
               transition: 'all 0.15s ease',
             })}
           >
@@ -260,7 +268,7 @@ function SidebarContent({ onLinkClick, showLogo = true }: { onLinkClick?: () => 
       </nav>
 
       {/* User */}
-      <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
@@ -271,7 +279,7 @@ function SidebarContent({ onLinkClick, showLogo = true }: { onLinkClick?: () => 
             {settings.userName.slice(0, 2).toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{settings.userName}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{settings.userName}</div>
             <div style={{ fontSize: 11, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{settings.userEmail}</div>
           </div>
           <button
@@ -357,7 +365,7 @@ export function Layout() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0f1e', color: '#f1f5f9', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(to bottom right, #ffffff, #f8fafc)', color: '#0f172a', overflow: 'hidden' }}>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
@@ -370,9 +378,10 @@ export function Layout() {
 
       {/* Desktop Sidebar — visible on md+ only */}
       <aside className="hidden md:flex" style={{
-        width: 260,
-        background: '#0d1526',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
+        width: 280,
+        background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+        borderRight: '1px solid #e2e8f0',
+        boxShadow: '4px 0 30px rgba(0,0,0,0.1)',
         flexDirection: 'column',
         flexShrink: 0,
         position: 'fixed',
@@ -387,15 +396,17 @@ export function Layout() {
       {/* Mobile Sidebar — visible below md only, slides in from left */}
       {sidebarOpen && (
         <aside className="flex md:hidden" style={{
-          width: 260,
-          background: '#0d1526',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
+          width: 280,
+          background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+          borderRight: '1px solid #e2e8f0',
+          boxShadow: '4px 0 30px rgba(0,0,0,0.15)',
           flexDirection: 'column',
           position: 'fixed',
           left: 0,
           top: 0,
           bottom: 0,
           zIndex: 50,
+          animation: 'slideIn 0.3s ease-out',
         }}>
           {/* Mobile close header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 20 }}>
@@ -403,7 +414,7 @@ export function Layout() {
               <div style={{ width: 34, height: 34, borderRadius: 9, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <TrendingUp size={18} color="white" />
               </div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: '#f1f5f9' }}>FinanceOS</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }}>FinanceOS</div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -422,8 +433,9 @@ export function Layout() {
 
         {/* Topbar */}
         <header style={{
-          background: '#0d1526',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid #e2e8f0',
           padding: '0 24px',
           height: 64,
           display: 'flex',
@@ -442,23 +454,24 @@ export function Layout() {
             <Menu size={22} />
           </button>
 
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', flex: 1 }}>{pageTitle}</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', flex: 1 }}>{pageTitle}</h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 
             {/* Notification Bell */}
             <div ref={notifRef} style={{ position: 'relative' }}>
-              <button
-                onClick={() => setNotifOpen(prev => !prev)}
-                style={{
-                  background: notifOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${notifOpen ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.08)'}`,
-                  borderRadius: 10, padding: '8px', cursor: 'pointer',
-                  color: notifOpen ? '#818cf8' : '#94a3b8',
-                  position: 'relative', display: 'flex', alignItems: 'center',
-                  transition: 'all 0.2s',
-                }}
-              >
+               <button
+                 onClick={() => setNotifOpen(prev => !prev)}
+                 style={{
+                   background: notifOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+                   border: `1px solid ${notifOpen ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                   borderRadius: 12, padding: '8px', cursor: 'pointer',
+                   color: notifOpen ? '#818cf8' : '#94a3b8',
+                   position: 'relative', display: 'flex', alignItems: 'center',
+                   transition: 'all 0.2s',
+                   boxShadow: notifOpen ? '0 0 20px rgba(99,102,241,0.25)' : 'none',
+                 }}
+               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
                   <span style={{
@@ -470,18 +483,20 @@ export function Layout() {
                 )}
               </button>
 
-              {/* Notification Dropdown */}
-              {notifOpen && (
-                <div style={{
-                  position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                  width: 360, maxHeight: 480,
-                  background: '#0d1526',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 16,
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-                  overflow: 'hidden',
-                  zIndex: 100,
-                }}>
+                {/* Notification Dropdown */}
+                {notifOpen && (
+                   <div className="notification-dropdown" style={{
+                     position: 'absolute', top: 'calc(100% + 12px)', right: 0,
+                     width: 380, maxHeight: 520,
+                     background: 'rgba(255, 255, 255, 0.95)',
+                     backdropFilter: 'blur(20px)',
+                     border: '1px solid #e2e8f0',
+                     borderRadius: 20,
+                     boxShadow: '0 25px 60px rgba(0,0,0,0.15), 0 0 40px rgba(99,102,241,0.1)',
+                     overflow: 'hidden',
+                     zIndex: 100,
+                     animation: 'scaleIn 0.2s ease-out',
+                   }}>
                   {/* Header */}
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -490,7 +505,7 @@ export function Layout() {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Bell size={16} color="#818cf8" />
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>Notifications</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Notifications</span>
                       {unreadCount > 0 && (
                         <span style={{
                           fontSize: 11, fontWeight: 700, color: 'white',
@@ -536,14 +551,24 @@ export function Layout() {
                               background: notif.read ? 'transparent' : 'rgba(99,102,241,0.05)',
                               borderBottom: '1px solid rgba(255,255,255,0.04)',
                               cursor: 'pointer',
-                              transition: 'background 0.15s',
+                              transition: 'all 0.2s ease',
                               position: 'relative',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = notif.read ? 'rgba(255,255,255,0.05)' : 'rgba(99,102,241,0.1)';
+                              e.currentTarget.style.transform = 'translateX(2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = notif.read ? 'transparent' : 'rgba(99,102,241,0.05)';
+                              e.currentTarget.style.transform = 'translateX(0)';
                             }}
                           >
                             {!notif.read && (
                               <div style={{
                                 position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
-                                width: 6, height: 6, borderRadius: '50%', background: '#6366f1',
+                                width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                boxShadow: '0 0 10px rgba(99,102,241,0.5)',
+                                animation: 'pulse 2s infinite',
                               }} />
                             )}
                             <div style={{
@@ -554,7 +579,7 @@ export function Layout() {
                               <Icon size={16} color={meta.color} />
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 13, fontWeight: notif.read ? 500 : 600, color: '#f1f5f9', marginBottom: 2 }}>
+                              <div style={{ fontSize: 13, fontWeight: notif.read ? 500 : 600, color: '#0f172a', marginBottom: 2 }}>
                                 {notif.title}
                               </div>
                               <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
@@ -606,26 +631,38 @@ export function Layout() {
             <div style={{ position: 'relative' }}>
               <div
                 style={{
-                  width: 36, height: 36, borderRadius: 10,
+                  width: 40, height: 40, borderRadius: 12,
                   background: 'linear-gradient(135deg, #6366f1, #a855f7)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 13, fontWeight: 700, color: 'white', cursor: 'pointer',
                   flexShrink: 0,
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 15px rgba(99,102,241,0.25)',
                 }}
                 onClick={() => setUserMenuOpen(prev => !prev)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 6px 25px rgba(99,102,241,0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(99,102,241,0.25)';
+                }}
               >
                 {settings.userName.slice(0, 2).toUpperCase()}
               </div>
-              {userMenuOpen && (
-                <div style={{
-                  position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                  background: '#0d1526',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 12,
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-                  minWidth: 160,
-                  zIndex: 100,
-                }}>
+                {userMenuOpen && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 16,
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 0 30px rgba(99,102,241,0.1)',
+                    minWidth: 160,
+                    zIndex: 100,
+                    animation: 'scaleIn 0.2s ease-out',
+                  }}>
                   <button
                     onClick={logout}
                     style={{
@@ -648,11 +685,37 @@ export function Layout() {
           </div>
         </header>
 
-        {/* Page Content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
-}
+         {/* Page Content */}
+         <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+           <Outlet />
+          </main>
+       </div>
+       <style>{`
+         @keyframes pulse {
+           0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+           50% { opacity: 0.7; transform: translateY(-50%) scale(1.2); }
+         }
+         @keyframes slideIn {
+           from { transform: translateX(-100%); }
+           to { transform: translateX(0); }
+         }
+         @keyframes scaleIn {
+           from { opacity: 0; transform: scale(0.9); }
+           to { opacity: 1; transform: scale(1); }
+         }
+         @media (max-width: 480px) {
+           .notification-dropdown {
+             position: fixed !important;
+             top: 15% !important;
+             left: 5% !important;
+             right: 5% !important;
+             width: 90vw !important;
+             maxHeight: 70vh !important;
+             borderRadius: 20px !important;
+             boxShadow: 0 25px 60px rgba(0,0,0,0.2), 0 0 40px rgba(99,102,241,0.1) !important;
+           }
+         }
+       `}</style>
+     </div>
+   );
+ }

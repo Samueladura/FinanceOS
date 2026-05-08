@@ -5,7 +5,7 @@ import { supabase } from './lib/supabase';
 import { FinanceProvider } from './apps/context/FinanceContext';
 import { Layout } from './apps/components/Layout';
 import { Dashboard } from './apps/pages/Dashboard';
-import { Transactions } from './apps/pages/Transactions';
+import Transactions from './apps/pages/Transactions';
 import { Budget } from './apps/pages/Budget';
 import { Analytics } from './apps/pages/Analytics';
 import { Accounts } from './apps/pages/Account';

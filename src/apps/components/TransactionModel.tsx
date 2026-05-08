@@ -96,58 +96,118 @@ export function TransactionModal({ open, onClose, initial }: Props) {
     onClose();
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 10, padding: '10px 14px', color: '#f1f5f9', fontSize: 14,
-    outline: 'none', boxSizing: 'border-box' as const,
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: 'rgba(255, 255, 255, 0.7)',
+    border: '1px solid rgba(226, 232, 240, 0.8)',
+    borderRadius: 12,
+    padding: '12px 14px',
+    color: '#0f172a',
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+    transition: 'all 0.2s',
+    backdropFilter: 'blur(10px)',
   };
 
-  const labelStyle: React.CSSProperties = {
-    fontSize: 12, color: '#94a3b8', marginBottom: 6, display: 'block', fontWeight: 500,
-    textTransform: 'uppercase' as const, letterSpacing: '0.06em',
-  };
+   const labelStyle: React.CSSProperties = {
+     fontSize: 11,
+     color: '#64748b',
+     marginBottom: 8,
+     display: 'block',
+     fontWeight: 700,
+     textTransform: 'uppercase' as const,
+     letterSpacing: '0.1em',
+   };
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+      background: 'rgba(0,0,0,0.5)',
+      backdropFilter: 'blur(8px)',
       padding: 16,
+      animation: 'fadeIn 0.2s ease-out',
     }}>
       <div style={{
-        background: '#0d1526', border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 20, width: '100%', maxWidth: 520, maxHeight: '90vh',
-        overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
+        background: 'rgba(255, 255, 255, 0.85)',
+        border: '1px solid rgba(226, 232, 240, 0.6)',
+        borderRadius: 24,
+        width: '100%',
+        maxWidth: 520,
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.3)',
+        animation: 'scaleIn 0.25s ease-out',
+        backdropFilter: 'blur(20px)',
       }}>
-        {/* Header */}
-        <div style={{ padding: '24px 24px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ 
+          padding: '28px 28px 0', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          background: 'rgba(255, 255, 255, 0.9)',
+          zIndex: 10,
+          backdropFilter: 'blur(10px)',
+        }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
               {initial ? 'Edit Transaction' : 'New Transaction'}
             </h2>
-            <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>
+            <p style={{ fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 1.4 }}>
               {initial ? 'Update transaction details' : 'Add a new transaction to your records'}
             </p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#94a3b8' }}>
+          <button onClick={onClose} style={{
+            background: 'rgba(0, 0, 0, 0.05)',
+            border: 'none',
+            borderRadius: 12,
+            padding: 10,
+            cursor: 'pointer',
+            color: '#64748b',
+            transition: 'all 0.2s',
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)';
+            e.currentTarget.style.color = '#0f172a';
+            e.currentTarget.style.transform = 'rotate(90deg)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)';
+            e.currentTarget.style.color = '#64748b';
+            e.currentTarget.style.transform = 'rotate(0deg)';
+          }}>
             <X size={18} />
           </button>
         </div>
 
-        {/* Type Selector */}
-        <div style={{ padding: '20px 24px 0' }}>
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 4, gap: 4 }}>
+        <div style={{ padding: '20px 28px 4' }}>
+          <div style={{ 
+            display: 'flex', 
+            background: 'rgba(0, 0, 0, 0.03)', 
+            borderRadius: 14, 
+            padding: 5, 
+            gap: 5,
+            boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.08)',
+          }}>
             {(['expense', 'income', 'transfer'] as TransactionType[]).map(t => (
               <button
                 key={t}
                 type="button"
                 onClick={() => { setType(t); setCategory(''); }}
                 style={{
-                  flex: 1, padding: '9px 0', borderRadius: 9, border: 'none', cursor: 'pointer',
-                  fontSize: 13, fontWeight: 600, textTransform: 'capitalize',
+                  flex: 1,
+                  padding: '10px 0',
+                  borderRadius: 10,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textTransform: 'capitalize',
                   background: type === t ? typeColors[t] : 'transparent',
                   color: type === t ? 'white' : '#64748b',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: type === t ? `0 4px 15px ${typeColors[t]}40` : 'none',
                 }}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -156,7 +216,7 @@ export function TransactionModal({ open, onClose, initial }: Props) {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form onSubmit={handleSubmit} style={{ padding: '24px 28px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Amount */}
           <div>
             <label style={labelStyle}>Amount</label>
@@ -294,13 +354,13 @@ export function TransactionModal({ open, onClose, initial }: Props) {
             />
           </div>
 
-          {/* Recurring */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '14px 16px' }}>
+          {'Recurring'}
+          <div style={{ background: 'rgba(255, 255, 255, 0.5)', border: '1px solid rgba(226, 232, 240, 0.6)', borderRadius: 12, padding: '14px 16px', backdropFilter: 'blur(10px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <RefreshCw size={16} color="#6366f1" />
                 <div>
-                  <div style={{ fontSize: 14, color: '#f1f5f9', fontWeight: 500 }}>Recurring Transaction</div>
+                  <div style={{ fontSize: 14, color: '#0f172a', fontWeight: 500 }}>Recurring Transaction</div>
                   <div style={{ fontSize: 12, color: '#64748b' }}>Repeats automatically</div>
                 </div>
               </div>
@@ -309,7 +369,7 @@ export function TransactionModal({ open, onClose, initial }: Props) {
                 onClick={() => setRecurring(!recurring)}
                 style={{
                   width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
-                  background: recurring ? '#6366f1' : 'rgba(255,255,255,0.1)',
+                  background: recurring ? '#6366f1' : 'rgba(0, 0, 0, 0.1)',
                   position: 'relative', transition: 'background 0.2s',
                 }}
               >
@@ -344,8 +404,8 @@ export function TransactionModal({ open, onClose, initial }: Props) {
               type="button"
               onClick={onClose}
               style={{
-                flex: 1, padding: '12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
-                background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 14, fontWeight: 600,
+                flex: 1, padding: '12px', borderRadius: 12, border: '1px solid rgba(0, 0, 0, 0.1)',
+                background: 'transparent', color: '#64748b', cursor: 'pointer', fontSize: 14, fontWeight: 600,
               }}
             >
               Cancel

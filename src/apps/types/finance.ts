@@ -2,7 +2,7 @@ export type TransactionType = 'income' | 'expense' | 'transfer';
 export type AccountType = 'checking' | 'savings' | 'credit' | 'investment' | 'cash' | 'other';
 export type BudgetPeriod = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type RecurringInterval = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
-export type ThemeMode = 'dark' | 'light';
+export type ThemeMode = 'light';
 export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'NGN' | 'JPY' | 'CAD' | 'AUD' | 'CHF' | 'INR' | 'BRL' | 'MXN';
 
 export interface Transaction {
@@ -44,7 +44,7 @@ export interface Budget {
 export interface Category {
   id: string;
   name: string;
-  icon: string;
+  icon: string; // Lucide icon name
   color: string;
   type: 'income' | 'expense' | 'both';
 }

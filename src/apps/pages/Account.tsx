@@ -1,9 +1,50 @@
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, TrendingUp, CreditCard, PiggyBank, Briefcase, DollarSign, Landmark } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, CreditCard, PiggyBank, Briefcase, DollarSign, Landmark,
+  // Category icons
+  ShoppingCart, Car, Home, Utensils, Heart, Book, Gamepad2,
+  DollarSign as DollarIcon, Smartphone, Wifi, Zap, Droplets, Shirt, Baby,
+  GraduationCap, Plane, Coffee, Music, Camera, Wrench, Pill, Stethoscope,
+  Dumbbell, Palette, Film, Gift, TreePine, Fuel, Building2, Bus } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { AccountModal } from '../components/AccountModel';
 import type { Account, AccountType } from '../types/finance';
+
+const CATEGORY_ICONS = [
+  { name: 'ShoppingCart', icon: ShoppingCart, label: 'Shopping' },
+  { name: 'Car', icon: Car, label: 'Transportation' },
+  { name: 'Home', icon: Home, label: 'Housing' },
+  { name: 'Utensils', icon: Utensils, label: 'Food' },
+  { name: 'Heart', icon: Heart, label: 'Health' },
+  { name: 'Book', icon: Book, label: 'Education' },
+  { name: 'Gamepad2', icon: Gamepad2, label: 'Entertainment' },
+  { name: 'Briefcase', icon: Briefcase, label: 'Work' },
+  { name: 'DollarIcon', icon: DollarIcon, label: 'Income' },
+  { name: 'PiggyBank', icon: PiggyBank, label: 'Savings' },
+  { name: 'CreditCard', icon: CreditCard, label: 'Bills' },
+  { name: 'Smartphone', icon: Smartphone, label: 'Phone' },
+  { name: 'Wifi', icon: Wifi, label: 'Internet' },
+  { name: 'Zap', icon: Zap, label: 'Utilities' },
+  { name: 'Droplets', icon: Droplets, label: 'Water' },
+  { name: 'Shirt', icon: Shirt, label: 'Clothing' },
+  { name: 'Baby', icon: Baby, label: 'Family' },
+  { name: 'GraduationCap', icon: GraduationCap, label: 'Education' },
+  { name: 'Plane', icon: Plane, label: 'Travel' },
+  { name: 'Coffee', icon: Coffee, label: 'Beverages' },
+  { name: 'Music', icon: Music, label: 'Music' },
+  { name: 'Camera', icon: Camera, label: 'Photography' },
+  { name: 'Wrench', icon: Wrench, label: 'Maintenance' },
+  { name: 'Pill', icon: Pill, label: 'Medical' },
+  { name: 'Stethoscope', icon: Stethoscope, label: 'Healthcare' },
+  { name: 'Dumbbell', icon: Dumbbell, label: 'Fitness' },
+  { name: 'Palette', icon: Palette, label: 'Arts' },
+  { name: 'Film', icon: Film, label: 'Movies' },
+  { name: 'Gift', icon: Gift, label: 'Gifts' },
+  { name: 'TreePine', icon: TreePine, label: 'Nature' },
+  { name: 'Fuel', icon: Fuel, label: 'Fuel' },
+  { name: 'Building2', icon: Building2, label: 'Business' },
+  { name: 'Bus', icon: Bus, label: 'Public Transport' },
+];
 
 const accountIcons: Record<AccountType, React.ReactNode> = {
   checking: <Landmark size={22} />,
@@ -41,6 +82,12 @@ export function Accounts() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   const sym = displayCurrencySymbol;
+
+  // Helper function to get icon component
+  const getCategoryIcon = (iconName: string) => {
+    const iconData = CATEGORY_ICONS.find(icon => icon.name === iconName);
+    return iconData ? iconData.icon : ShoppingCart; // Default to ShoppingCart if not found
+  };
   const totalAssets = accounts.filter(a => a.balance > 0).reduce((s, a) => s + a.balance, 0);
   const totalLiabilities = accounts.filter(a => a.balance < 0).reduce((s, a) => s + Math.abs(a.balance), 0);
   const netWorth = totalAssets - totalLiabilities;
@@ -63,7 +110,7 @@ export function Accounts() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#f1f5f9' }}>Accounts</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a' }}>Accounts</h2>
           <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Manage your financial accounts</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -72,10 +119,11 @@ export function Accounts() {
             onChange={(e) => setSelectedAccountCurrency(e.target.value)}
             style={{
               padding: '8px 12px',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 8,
-              color: '#f1f5f9',
+              background: '#f8fafc',
+
+              border: '1px solid #e2e8f0',
+
+              color: '#0f172a',
               fontSize: 13,
               cursor: 'pointer',
               outline: 'none',
@@ -98,8 +146,8 @@ export function Accounts() {
         display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20,
       }}>
         <div>
-          <div style={{ fontSize: 12, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Total Net Worth</div>
-          <div style={{ fontSize: 36, fontWeight: 800, color: '#f1f5f9', letterSpacing: '-1px' }}>{formatCurrency(netWorth, sym)}</div>
+          <div style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Total Net Worth</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>{formatCurrency(netWorth, sym)}</div>
           <div style={{ fontSize: 13, color: '#64748b', marginTop: 6 }}>Across {accounts.length} accounts</div>
         </div>
         <div style={{ display: 'flex', gap: 32 }}>
@@ -143,12 +191,12 @@ export function Accounts() {
                     {accountIcons[acc.type]}
                   </div>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9' }}>{acc.name}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{acc.name}</div>
                     <div style={{ fontSize: 12, color: '#64748b', textTransform: 'capitalize', marginTop: 1 }}>{acc.type}{acc.isDefault ? ' · Default' : ''}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
-                  <button onClick={() => handleEdit(acc)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px', cursor: 'pointer', color: '#94a3b8' }}>
+                  <button onClick={() => handleEdit(acc)} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '6px', cursor: 'pointer', color: '#64748b' }}>
                     <Edit2 size={13} />
                   </button>
                   <button onClick={() => handleDelete(acc.id)} style={{ background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', borderRadius: 8, padding: '6px', cursor: 'pointer', color: '#f43f5e' }}>
@@ -169,7 +217,7 @@ export function Accounts() {
                       <span>Credit utilization</span>
                       <span>{(Math.abs(acc.balance) / acc.creditLimit * 100).toFixed(1)}%</span>
                     </div>
-                    <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 100 }}>
+                    <div style={{ height: 4, background: '#e2e8f0', borderRadius: 100 }}>
                       <div style={{ height: '100%', width: `${Math.min(Math.abs(acc.balance) / acc.creditLimit * 100, 100)}%`, background: acc.color, borderRadius: 100 }} />
                     </div>
                   </div>
@@ -198,13 +246,13 @@ export function Accounts() {
 
       {/* Account Transactions Panel */}
       {selectedAccount && (
-        <div style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 16, padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: '#f1f5f9' }}>{selectedAccount.name} — Recent Transactions</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>{selectedAccount.name} — Recent Transactions</div>
               <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Last 20 transactions for this account</div>
             </div>
-            <button onClick={() => setSelectedAccountId(null)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '7px 14px', color: '#94a3b8', cursor: 'pointer', fontSize: 13 }}>
+            <button onClick={() => setSelectedAccountId(null)} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '7px 14px', color: '#64748b', cursor: 'pointer', fontSize: 13 }}>
               Close
             </button>
           </div>
@@ -215,13 +263,16 @@ export function Accounts() {
               {accountTransactions.map(tx => {
                 const cat = categories.find(c => c.id === tx.category);
                 return (
-                  <div key={tx.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.02)' }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 10, background: `${cat?.color || '#64748b'}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-                      {cat?.icon || '📦'}
+                  <div key={tx.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 12, background: '#f8fafc' }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: `${cat?.color || '#64748b'}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {(() => {
+                        const IconComponent = getCategoryIcon(cat?.icon || 'ShoppingCart');
+                        return <IconComponent size={16} color={cat?.color || '#64748b'} />;
+                      })()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.description}</div>
-                      <div style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>{formatDate(tx.date)} · {cat?.name || 'Other'}</div>
+                      <div style={{ fontSize: 13, color: '#0f172a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.description}</div>
+                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{formatDate(tx.date)} · {cat?.name || 'Other'}</div>
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: tx.type === 'income' ? '#10b981' : tx.type === 'expense' ? '#f43f5e' : '#6366f1', flexShrink: 0 }}>
                       {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}{formatCurrency(tx.amount, sym)}
@@ -238,12 +289,12 @@ export function Accounts() {
 
       {deletingId && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', padding: 16 }}>
-          <div style={{ background: '#0d1526', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: 28, maxWidth: 380, width: '100%', textAlign: 'center' }}>
+          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 20, padding: 28, maxWidth: 380, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Delete Account?</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Delete Account?</h3>
             <p style={{ fontSize: 14, color: '#64748b', marginBottom: 24 }}>This will permanently remove the account. Transaction history will remain.</p>
             <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={() => setDeletingId(null)} style={{ flex: 1, padding: '11px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Cancel</button>
+              <button onClick={() => setDeletingId(null)} style={{ flex: 1, padding: '11px', borderRadius: 12, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Cancel</button>
               <button onClick={confirmDelete} style={{ flex: 1, padding: '11px', borderRadius: 12, border: 'none', background: '#f43f5e', color: 'white', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>Delete</button>
             </div>
           </div>

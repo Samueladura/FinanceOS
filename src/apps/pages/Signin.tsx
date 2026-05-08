@@ -33,7 +33,7 @@ export function Signin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, #0a0f1e 0%, #1e1b4b 50%, #2a1d5c 100%)',
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%)',
       backgroundSize: '400% 400%',
       animation: 'gradientShift 15s ease infinite'
     }}>
@@ -63,7 +63,7 @@ export function Signin() {
           position: 'absolute',
           top: '20%',
           right: '10%',
-          width: 4, height: 4, background: 'rgba(99, 102, 241, 0.6)',
+          width: 4, height: 4, background: 'rgba(99, 102, 241, 0.3)',
           borderRadius: '50%',
           animation: 'float 6s ease-in-out infinite'
         }} />
@@ -71,7 +71,7 @@ export function Signin() {
           position: 'absolute',
           bottom: '30%',
           left: '15%',
-          width: 6, height: 6, background: 'rgba(139, 92, 246, 0.5)',
+          width: 6, height: 6, background: 'rgba(139, 92, 246, 0.25)',
           borderRadius: '50%',
           animation: 'float 8s ease-in-out infinite 2s'
         }} />
@@ -79,7 +79,7 @@ export function Signin() {
           position: 'absolute',
           top: '60%',
           right: '25%',
-          width: 3, height: 3, background: 'rgba(99, 102, 241, 0.4)',
+          width: 3, height: 3, background: 'rgba(99, 102, 241, 0.2)',
           borderRadius: '50%',
           animation: 'float 5s ease-in-out infinite 4s'
         }} />
@@ -92,12 +92,12 @@ export function Signin() {
       }}>
         {/* Glassmorphism card */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
+          background: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
           borderRadius: 24,
           padding: 48,
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)'
         }}>
           {/* Logo */}
           <div style={{
@@ -112,22 +112,22 @@ export function Signin() {
               <TrendingUp size={24} color="white" />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 24, color: '#f1f5f9', letterSpacing: '-0.5px' }}>FinanceOS</div>
-              <div style={{ fontSize: 13, color: '#94a3b8' }}>Welcome back</div>
+              <div style={{ fontWeight: 800, fontSize: 24, color: '#0f172a', letterSpacing: '-0.5px' }}>FinanceOS</div>
+              <div style={{ fontSize: 13, color: '#64748b' }}>Welcome back</div>
             </div>
           </div>
 
-          <h1 style={{ 
-            margin: 0, marginBottom: 8, 
-            fontSize: 32, fontWeight: 800, 
-            color: '#f1f5f9', 
+          <h1 style={{
+            margin: 0, marginBottom: 8,
+            fontSize: 32, fontWeight: 800,
+            color: '#0f172a',
             letterSpacing: '-0.5px'
           }}>
             Sign in
           </h1>
-          <p style={{ 
-            margin: 0, marginBottom: 36, 
-            color: '#94a3b8', 
+          <p style={{
+            margin: 0, marginBottom: 36,
+            color: '#64748b',
             fontSize: 16,
             lineHeight: 1.6
           }}>
@@ -150,9 +150,9 @@ export function Signin() {
 
           {/* Email Field */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ 
+            <label style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              color: '#94a3b8', fontSize: 13, fontWeight: 600,
+              color: '#64748b', fontSize: 13, fontWeight: 600,
               marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
             }}>
               <Mail size={16} />
@@ -160,26 +160,26 @@ export function Signin() {
             </label>
             <div style={{
               position: 'relative',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
               borderRadius: 16,
               transition: 'all 0.2s ease',
               overflow: 'hidden'
             }}>
-              <input 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-                required 
-                type="email" 
-                style={{ 
-                  width: '100%', 
-                  padding: '16px 20px 16px 52px', 
-                  background: 'transparent', 
-                  color: 'white', 
-                  border: 'none', 
+              <input
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                type="email"
+                style={{
+                  width: '100%',
+                  padding: '16px 20px 16px 52px',
+                  background: 'transparent',
+                  color: '#0f172a',
+                  border: 'none',
                   outline: 'none',
                   fontSize: 16
-                }} 
+                }}
                 placeholder="your@email.com"
               />
               <Mail size={18} color="#64748b" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
@@ -188,9 +188,9 @@ export function Signin() {
 
           {/* Password Field */}
           <div style={{ marginBottom: 28 }}>
-            <label style={{ 
+            <label style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              color: '#94a3b8', fontSize: 13, fontWeight: 600,
+              color: '#64748b', fontSize: 13, fontWeight: 600,
               marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em'
             }}>
               <Lock size={16} />
@@ -198,26 +198,26 @@ export function Signin() {
             </label>
             <div style={{
               position: 'relative',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
               borderRadius: 16,
               transition: 'all 0.2s ease',
               overflow: 'hidden'
             }}>
-              <input 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                required 
-                type="password" 
-                style={{ 
-                  width: '100%', 
-                  padding: '16px 20px 16px 52px', 
-                  background: 'transparent', 
-                  color: 'white', 
-                  border: 'none', 
+              <input
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                type="password"
+                style={{
+                  width: '100%',
+                  padding: '16px 20px 16px 52px',
+                  background: 'transparent',
+                  color: '#0f172a',
+                  border: 'none',
                   outline: 'none',
                   fontSize: 16
-                }} 
+                }}
                 placeholder="••••••••"
               />
               <Lock size={18} color="#64748b" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
